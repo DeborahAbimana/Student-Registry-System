@@ -3,8 +3,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
 
@@ -13,51 +11,68 @@ public class RegistryManager {
 
     public void loadStudentsFromFile(String fileName) {
 
-   students.clear();
-   try(
-    BufferedReader reader = new BufferedReader(new FileReader(fileName)))
+        students.clear();
 
-    {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.trim().isEmpty()) {
-                continue;
+        try (
+                BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            boolean headerSkipped = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                if (!headerSkipped) {
+                    headerSkipped = true;
+                    continue;
+                }
+                String[] data = line.split(",");
+                if (data.length != 4) {
+                    System.out.println("invalid student record: " + line);
+                    continue;
+                }
+                try {int id = Integer.parseInt(data[0].trim()) ;
+                String name = data[1].trim();
+                double gpa = Double.parseDouble(data[2].trim());
+                String major = data[3].trim();
+                Student student = new Student(id, name, gpa, major);
+                students.add(student);
+
             }
-            String[] data = line.split(",");
-            if (data.length != 4) {
-                System.out.println("INVALID RECORD: " + line);
-                continue;
+       catch(NumberFormatException e){
+                System.out.println("Invalid ID or GPA: " + line);
             }
-            int id = Integer.parseInt(data[0].trim());
-            String name = data[1].trim();
-            double gpa = Double.parseDouble(data[2].trim());
-            String major = data[3].trim();
-            Student student = new Student(id, name, gpa, major);
-            students.add(student);
         }
-        System.out.println("Students loaded sucessfully");
-    }
-   catch(
-    IOException e)
-
-    {
-        System.out.println("Error reading file: " + e.getMessage());
-    }
-   catch(
-    NumberFormatException e)
-
-    {
-        System.out.println("Invalid student gpa or ID:" + e.getMessage());
+        System.out.println("Student loaded successfully.");
+    }catch(IOException e){
+            System.out.println("Error reading file: " + e.getMessage());
     }
 }
-   public void displayAllStudents(){
+public void displayAllStudents(){
        System.out.println("\nALL STUDENTS");
 
        for (Student student : students) {
            System.out.println(student);
        }
    }
-   public void groupStudentsByMajor(){
-       Map<String,List<String>> groups=new LinkedHashMap<>();
+   public void groupStudentsByMajor() {
+       Map<String, List<String>> groups = new LinkedHashMap<>();
+       for (Student student : students) {
+           String major = student.getMajor();
+           if (!groups.containsKey(major)) {
+               groups.put(major, new ArrayList<>());
+           }
+           groups.get(major).add(student.getName());
+       }
+       System.out.println("\nSTUDENTS GROUPED BY MAJOR");
+       for (Map.Entry<String, List<String>> entry : groups.entrySet()) {
+           System.out.println("\n" + entry.getKey());
+
+           for (String name : entry.getValue()) {
+               System.out.println(name);
+           }
+       }
    }
-}
+   }
+
+
+
