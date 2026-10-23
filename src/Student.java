@@ -3,7 +3,6 @@ public class Student {
     private String name;
     private double gpa;
     private String major;
-
     Student(int id, String name, double gpa, String major) {
         this.id = id;
         this.name = name;
